@@ -1,0 +1,46 @@
+# Projeto Airlock
+## FPRO/LEIC, 2021/22
+## Luís Manuel Ribeiro de Sousa (up202005832)
+## 1LEIC08
+
+### Objetivo
+
+1. Criar um clone do Airlock da Atari 2600 no pygame
+
+2. Utilizar classes e o mínimo de PNG que conseguir
+
+3. Carregar os níveis a partir de um ficheiro .txt
+
+### Repositório de código
+
+1) Link para o repositório do GitHub: https://github.com/2002luis/Projeto_FPRO21
+
+2) Adicionar, como colaborador com permissão de leitura (*role read*):
+
+- https://github.com/AfonsoSalgadoSousa
+- https://github.com/jlopes60
+- https://github.com/nmacedo
+- https://github.com/rpmcruz
+- https://github.com/eSoares
+- https://github.com/pbv
+
+### Descrição
+
+*---Um jogo em que o utilizador controla uma pessoa que tenta evitar os obstáculos para fugir de um submarino que se está a afundar---*
+
+### UI
+
+![UI]
+
+### Pacotes
+
+- Pygame
+
+### Tarefas
+
+1. carregar e desenhar o nível
+2. ler teclas e mover o jogador e inimigo
+4. verificar se o jogador carregou nos botões ou se bateu em algum obstáculo
+3. verificar se o jogador chegou ao fim de cada parte do nível
+
+- Atualizado a última vez em 09/12/2021
