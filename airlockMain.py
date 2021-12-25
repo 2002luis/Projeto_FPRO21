@@ -29,28 +29,33 @@ def openWalls(wall,button):
  '''
 
 
-def badCollision(player,testObject,image): ## NO CASO DE COLIDIR COM ALGUMA COISA MÁ, TENHO QUE DAR ALGUM ESPAÇO
+def badCollision(player,testObject,tup): ## NO CASO DE COLIDIR COM ALGUMA COISA MÁ, TENHO QUE DAR ALGUM ESPAÇO
     if(type(testObject)==list):
         for i in testObject:
-            if (badCollision(player,i,image)):
+            if (badCollision(player,i,tup)):
                 return(i)
     else:
-        if(pygame.Rect.colliderect(pygame.Rect(int(player.floatX)+5,int(player.floatY)-24,32-10,24),pygame.Rect(testObject.intX+2,testObject.intY+4,image.get_width()-4,image.get_height()))):
+        if(pygame.Rect.colliderect(pygame.Rect(int(player.floatX)+5,int(player.floatY)-24,32-10,24),pygame.Rect(testObject.intX+2,testObject.intY+4,tup[0]-4,tup[1]))):
             player.floatVy=abs(player.floatVy)
             return(testObject)
     return(False)
 
-def goodCollision(player,testObject,image): ## NO CASO DE COLIDIR COM ALGUMA COISA BOA, NÃO PRECISO
+def goodCollision(player,testObject): ## NO CASO DE COLIDIR COM ALGUMA COISA BOA, NÃO PRECISO
     if(type(testObject)==list):
         for i in testObject:
-            if (goodCollision(player,i,image)):
+            if (goodCollision(player,i)):
                 return(i)
     else:
-        if(pygame.Rect.colliderect(pygame.Rect(int(player.floatX),int(player.floatY)-24,32,24),pygame.Rect(testObject.intX,testObject.intY,12,24))):
+        if(pygame.Rect.colliderect(pygame.Rect(int(player.floatX),int(player.floatY)-24,32,24),pygame.Rect(testObject.intX,testObject.intY,12,24))): ##O MESMO TAMANHO FUNCIONA PARA TODAS AS COISAS BOAS, BOTOES E ELEVADORES
             return(testObject)
     return(False)
 
-def drawList(listObj,screen,image):
+def drawList(listObj,screen):
+    for obj in listObj:
+        if (obj.boolEnabled):
+            obj.Draw(screen)
+
+def drawListEntity(listObj,screen,image):
     for obj in listObj:
         if (obj.boolEnabled):
             obj.Draw(screen,image)
@@ -125,14 +130,14 @@ boolHoldingW=False
 
 ##IMAGENS
 levelImage=pygame.image.load("images/mundoVazio.png")
-blockImage=pygame.image.load("images/block.png")
-elevatorImage=pygame.image.load("images/elevator.png")
-elevatorImage2=pygame.image.load("images/elevator2.png")
-wallImage=pygame.image.load("images/wall.png")
+##blockImage=pygame.image.load("images/block.png")
+##elevatorImage=pygame.image.load("images/elevator.png")
+##elevatorImage2=pygame.image.load("images/elevator2.png")
+##wallImage=pygame.image.load("images/wall.png")
 playerImage=pygame.image.load("images/playerChar.png")
 playerFallenImage=pygame.image.load("images/playerCharHurt.png")
-bigSwitchImage=pygame.image.load("images/bigSwitch.png")
-smallSwitchImage=pygame.image.load("images/smallSwitch.png")
+##bigSwitchImage=pygame.image.load("images/bigSwitch.png")
+##smallSwitchImage=pygame.image.load("images/smallSwitch.png")
 enemyImage=pygame.image.load("images/enemyChar.png")
 mainMenuImage=pygame.image.load("images/mainMenu.png")
 victoryRoyaleImage=pygame.image.load("images/victoryRoyale.png")
@@ -280,13 +285,13 @@ while(not kill):
             player.intHurt-=dt
             player.floatVy=abs(player.floatVy) ##PARA CAIR
         else:
-            if(badCollision(player,enemies,enemyImage) and not boolTempImmunity): ##DETETAR SE BATEU EM UM INIMGO
+            if(badCollision(player,enemies,(32,12)) and not boolTempImmunity): ##DETETAR SE BATEU EM UM INIMGO
                 player.intHurt=3000 ##3 SEGUNDOS
                 player.floatY=player.intFloorY
                 enemyHitSound.play()
             else:
                 if(not(elevators[intCurFloor].boolElevating)): ##SO SE MEXE SE NAO ESTIVER EM UM ELEVADOR
-                    intNewDir=player.HandleBlocks(badCollision(player,blocks,blockImage),intDir)
+                    intNewDir=player.HandleBlocks(badCollision(player,blocks,(21,15)),intDir)
                     if(intNewDir):
                         player.floatVy=abs(player.floatVy)
                         intNoMoreJumping=50
@@ -305,12 +310,12 @@ while(not kill):
 
                 ##SALTOS (SÓ SALTA SE NÃO ESTIVER MAGOADO)
             
-            if(bigSwitches[intCurFloor].boolEnabled and goodCollision(player,bigSwitches[intCurFloor],bigSwitchImage)): ##DETETAR SE CARREGOU EM UM BOTAO GRANDE
-                bigSwitches[intCurFloor].press(walls)
+            if(bigSwitches[intCurFloor].boolEnabled and goodCollision(player,bigSwitches[intCurFloor])): ##DETETAR SE CARREGOU EM UM BOTAO GRANDE
+                bigSwitches[intCurFloor].Press(walls)
                 buttonSound.play()
             
-            elif(goodCollision(player,smallSwitches[intCurFloor],smallSwitchImage) and not bigSwitches[intCurFloor].boolEnabled and smallSwitches[intCurFloor].boolEnabled): ##DETETAR SE CARREGOU EM UM BOTAO PEQUENO
-                smallSwitches[intCurFloor].press(walls[intCurFloor])
+            elif(goodCollision(player,smallSwitches[intCurFloor]) and not bigSwitches[intCurFloor].boolEnabled and smallSwitches[intCurFloor].boolEnabled): ##DETETAR SE CARREGOU EM UM BOTAO PEQUENO
+                smallSwitches[intCurFloor].Press(walls[intCurFloor])
                 if(intCurFloor<4):
                     walls[intCurFloor+1].boolEnabled=False
                 buttonSound.play()
@@ -360,7 +365,7 @@ while(not kill):
                 gameOverChannel.play(gameOverSound)
                 boolVictoryRoyale=False
                 ##RESET AS VARIAVEIS PARA UM JOGO NOVO
-                fishes = [[fish(175,310,1,0.15)],[fish(200,404,-1,0.23),fish(300,404,-1,0.23),fish(400,404,-1,0.23)],[fish(600,500,1,0.05)],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]]
+                fishes = [[],[],[],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]] ##SE PERDER SÓ APARECEM TARTARUGAS (castigo)
                 intDir=0
                 intCurFloor=0 ##O PISO DE BAIXO E 0, O DE CIMA DE TUDO E O 4
                 intNoMoreJumping=0 ##VARIAVEL PARA PREVENIR PYGAME BRUH MOMENTS
@@ -400,15 +405,16 @@ while(not kill):
 
         screen.blit(levelImage, (0,0))
 
-        drawList(walls,screen,wallImage)
+        drawList(walls,screen)
         ##drawList(elevators,screen,elevatorImage)
-        drawList(bigSwitches,screen,bigSwitchImage) ##NÃO QUERO ESTAR A FAZER UMA IMAGEM PARA CADA INSTANCIA DA CLASSE PQ ASSIM IA ESTAR A TER UM MONTE DE VARIAVEIS Q ERAM TODAS A MESMA IMAGEM
-        drawList(smallSwitches,screen,smallSwitchImage)
-        drawList(blocks,screen,blockImage)
-        drawList(enemies,screen,enemyImage)
+        drawList(bigSwitches,screen) ##NÃO QUERO ESTAR A FAZER UMA IMAGEM PARA CADA INSTANCIA DA CLASSE PQ ASSIM IA ESTAR A TER UM MONTE DE VARIAVEIS Q ERAM TODAS A MESMA IMAGEM
+        drawList(smallSwitches,screen)
+        drawList(blocks,screen)
+        
+        drawListEntity(enemies,screen,enemyImage)
 
         for elevator in elevators:
-            elevator.Draw(screen,elevatorImage,elevatorImage2)
+            elevator.Draw(screen)
         '''
         for wall in walls:
             if (wall.boolEnabled):

@@ -5,8 +5,10 @@ class tileWall():
         this.intY=intY
         this.boolEnabled=False
         
-    def Draw(this,screen,image):
-        screen.blit(image, (58, this.intY))
+    def Draw(this,screen):
+        ##screen.blit(image, (58, this.intY))
+        pygame.draw.rect(screen, (160,112,204), pygame.Rect(59, this.intY, 18, 80))
+        pygame.draw.rect(screen, (160,112,204), pygame.Rect(59+664, this.intY, 18, 80))
 
 class tileBlock():
     def __init__(this,intX,intY,intFloor):
@@ -14,8 +16,9 @@ class tileBlock():
         this.intY=intY
         this.intFloor=intFloor
         this.boolEnabled=False
-    def Draw(this,screen,image):
-        screen.blit(image, (this.intX, this.intY))
+    def Draw(this,screen):
+        ##screen.blit(image, (this.intX, this.intY))
+        pygame.draw.rect(screen, (160,112,204), pygame.Rect(this.intX+8, this.intY, 4, 15))
 
 class tileElevator():
     def __init__(this,intX,intY,intNewY):
@@ -25,11 +28,13 @@ class tileElevator():
         this.boolEnabled=False
         this.boolElevating=False
         
-    def Draw(this,screen,image,image2):
+    def Draw(this,screen):
         if(this.boolEnabled):
-            screen.blit(image, (this.intX, this.intY)) #EVENTUALMENTE SUBSTITUIR POR UM DESENHO Q N PRECISE DE IMAGEM
+            pygame.draw.rect(screen, (188,140,76), pygame.Rect(this.intX, this.intY, 38, 10))
+            ##screen.blit(image, (this.intX, this.intY)) #EVENTUALMENTE SUBSTITUIR POR UM DESENHO Q N PRECISE DE IMAGEM
         else:
-            screen.blit(image2, (this.intX, this.intNewY))
+            pygame.draw.rect(screen, (160,112,204), pygame.Rect(this.intX, this.intNewY, 38, 10))
+            ##screen.blit(image2, (this.intX, this.intNewY))
 
     def IsElevator(this,player):
         if(this.intX==21):
@@ -56,16 +61,22 @@ class switch():
         this.intY=intY
         this.intFloor=intFloor
         this.boolEnabled=False
+    '''
     def Draw(this,screen,image):
         screen.blit(image, (this.intX, this.intY))
+    '''
 
 class bigSwitch(switch):
-    def press(this,walls):
+    def Press(this,walls):
         this.boolEnabled=False
         for wall in walls:
             wall.boolEnabled=True
+    def Draw(this,screen):
+        pygame.draw.rect(screen, (188,140,76), pygame.Rect(this.intX, this.intY, 12, 20))
 
 class smallSwitch(switch):
-    def press(this,wall):
+    def Press(this,wall):
         this.boolEnabled=False
         wall.boolEnabled=False
+    def Draw(this,screen):
+        pygame.draw.rect(screen, (208,112,112), pygame.Rect(this.intX+2, this.intY, 8, 20))
