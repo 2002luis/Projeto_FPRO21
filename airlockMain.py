@@ -189,6 +189,12 @@ boolVictoryRoyale=False ##SÓ VAI IMPORTAR DEPOIS DE ACABAR O PRIMEIRO JOGO
 intTimeLeft=49999
 timeMainMenu=200
 
+##TIMER
+font = pygame.font.Font('consolas.ttf', 100)
+timerText = font.render('50', True, (188,140,76))
+timerRect = timerText.get_rect()
+timerRect.center = (725, 60)
+
 while(not kill):
     if(boolMainMenu): ##MENU!
         if(not gameOverChannel.get_busy()):
@@ -225,8 +231,10 @@ while(not kill):
         else:
             if(boolVictoryRoyale):
                 screen.blit(victoryRoyaleImage, (0, 0))
+                fishes = [[fish(175,310,1,0.15)],[fish(200,404,-1,0.23),fish(300,404,-1,0.23),fish(400,404,-1,0.23)],[fish(600,500,1,0.05)],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]]
             else:
                 screen.blit(gameOverImage, (0, 0))
+                fishes = [[],[],[],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]] ##SE PERDER SÓ APARECEM TARTARUGAS (castigo)
             ##O PYGAME.DISPLAY.FLIP() ESTÁ NO FIM DE TUDO, FORA DOS IFS E ELSES
     else:
         '''
@@ -329,7 +337,6 @@ while(not kill):
                     gameOverChannel.play(victoryRoyaleSound)
                     boolVictoryRoyale=True
                     ##RESET AS VARIAVEIS PARA UM JOGO NOVO
-                    fishes = [[fish(175,310,1,0.15)],[fish(200,404,-1,0.23),fish(300,404,-1,0.23),fish(400,404,-1,0.23)],[fish(600,500,1,0.05)],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]]
                     intDir=0
                     intCurFloor=0 ##O PISO DE BAIXO E 0, O DE CIMA DE TUDO E O 4
                     intNoMoreJumping=0 ##VARIAVEL PARA PREVENIR PYGAME BRUH MOMENTS
@@ -365,7 +372,6 @@ while(not kill):
                 gameOverChannel.play(gameOverSound)
                 boolVictoryRoyale=False
                 ##RESET AS VARIAVEIS PARA UM JOGO NOVO
-                fishes = [[],[],[],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]] ##SE PERDER SÓ APARECEM TARTARUGAS (castigo)
                 intDir=0
                 intCurFloor=0 ##O PISO DE BAIXO E 0, O DE CIMA DE TUDO E O 4
                 intNoMoreJumping=0 ##VARIAVEL PARA PREVENIR PYGAME BRUH MOMENTS
@@ -400,7 +406,7 @@ while(not kill):
         
         ##screen.fill((255,255,255)) EU SEI QUE O .fill EXISTE, MAS PREFIRO FAZER ISTO ASSIM
         pygame.draw.rect(screen, (0,0,0), pygame.Rect(0, 0, 800, 600))
-        pygame.draw.rect(screen, (0,0,255), pygame.Rect(0, floors[4-(intTimeLeft//10000)], 800, 600))
+        pygame.draw.rect(screen, (104,116,208), pygame.Rect(0, floors[4-(intTimeLeft//10000)], 800, 600))
         
 
         screen.blit(levelImage, (0,0))
@@ -442,7 +448,9 @@ while(not kill):
             player.Draw(screen,playerFallenImage)
         else:
             player.Draw(screen,playerImage)
-    
+
+        timerText = font.render(str((intTimeLeft//1000)+1), True, (188,140,76))
+        screen.blit(timerText, timerRect)
         
     pygame.display.flip()
 pygame.quit()
