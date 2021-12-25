@@ -1,6 +1,8 @@
+import pickle
+import pygame
 from airlockEntities import *
 from airlockUI import *
-import pygame
+
 
 def closeWalls(walls,button):
     button.boolEnabled=False
@@ -60,6 +62,16 @@ def moveFish(listObj,dt):
         else:
             obj.Move(dt)
 
+def writeFile(data,strPath):
+    file = open("levelData/"+strPath+".pckl", "wb")
+    pickle.dump(data, file)
+    file.close()
+
+def readFile(strPath):
+    file = open("levelData/"+strPath+".pckl", "rb")
+    obj = pickle.load(file)
+    file.close()
+    return(obj)
 '''
  _____     ____
  /      \  |  o | 
@@ -84,17 +96,31 @@ screen = pygame.display.set_mode((800, 600))
 clock=pygame.time.Clock()
 player=playerClass()
 floors = [534,449,361,276,189,106]
-enemies = [enemyClass(100,522,1,0),enemyClass(700,437,-1,0),enemyClass(100,349,1,0),enemyClass(700,264,-1,1),enemyClass(100,177,1,-1)]
 walls = [tileWall(460),tileWall(370),tileWall(283),tileWall(200),tileWall(117)]
 elevators = [tileElevator(21,534,449),tileElevator(741,449,361),tileElevator(21,361,276),tileElevator(741,276,189),tileElevator(21,189,106)]
+fishes = [[fish(175,310,1,0.15)],[fish(200,404,-1,0.23),fish(300,404,-1,0.23),fish(400,404,-1,0.23)],[fish(600,500,1,0.05)],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]]
+
+'''
+enemies = [enemyClass(100,522,1,0),enemyClass(700,437,-1,0),enemyClass(100,349,1,0),enemyClass(700,264,-1,1),enemyClass(100,177,1,-1)]
 blocks = [tileBlock(562,520,0),tileBlock(207,520,0),tileBlock(562,434,1),tileBlock(207,434,1),tileBlock(207,348,2),tileBlock(562,348,2),tileBlock(207,262,3),tileBlock(562,262,3),tileBlock(207,176,4),tileBlock(562,176,4)]
 bigSwitches = [bigSwitch(660,462,0),bigSwitch(140,375,1),bigSwitch(660,290,2),bigSwitch(140,203,3),bigSwitch(660,118,4)]
 smallSwitches = [smallSwitch(140,462,0),smallSwitch(660,375,1),smallSwitch(140,290,2),smallSwitch(660,203,3),smallSwitch(140,118,4)]
-fishes = [[fish(175,310,1,0.15)],[fish(200,404,-1,0.23),fish(300,404,-1,0.23),fish(400,404,-1,0.23)],[fish(600,500,1,0.05)],[fish(100,586,-1,0.005),fish(300,586,-1,0.005),fish(500,586,-1,0.005),fish(700,586,-1,0.005),fish(-26,586,-1,0.005)]]
+
+writeFile([enemies,blocks,bigSwitches,smallSwitches],"loadedLevel")
+'''
+
+##LER O NIVEL DE UM FICHEIRO
+data=readFile("loadedLevel")
+
+enemies=data[0]
+blocks=data[1]
+bigSwitches=data[2]
+smallSwitches=data[3]
 
 intDir=0
 intCurFloor=0 ##O PISO DE BAIXO E 0, O DE CIMA DE TUDO E O 4
 intNoMoreJumping=0 ##VARIAVEL PARA PREVENIR PYGAME BRUH MOMENTS
+intTimeLeft=50000 ##50 SEGUNDOS, O LIMITE DE TEMPO DO JOGO
 boolHoldingW=False
 
 ##IMAGENS
@@ -132,6 +158,8 @@ player.boolFloor=False
 
 boolDebugger=False
 boolMainMenu=True
+boolTempImmunity=True ##O JOGO FICA PARADO ATÉ AO PRIMEIRO MOVIMENTO (COMO NO ORIGINAL)
+intTimeLeft=49999
 timeMainMenu=200
 
 while(not kill):
@@ -140,6 +168,7 @@ while(not kill):
         '''
         EVENTOS
         '''
+        boolTempImmunity=True
         if(timeMainMenu>0):
             timeMainMenu-=dt
         events = pygame.event.get()
@@ -178,11 +207,14 @@ while(not kill):
                     boolHoldingW=False
             elif (event.type == pygame.KEYDOWN):
                 if (event.key==pygame.K_w and intNoMoreJumping<=0 and (not player.boolJumping) and (not boolHoldingW) and player.intHurt<=0):
+                    boolTempImmunity = False
                     boolHoldingW = True
                     player.Jump()
         if (keys[pygame.K_a] and (not player.boolJumping)):
+            boolTempImmunity = False
             intDir=-1
         elif (keys[pygame.K_d] and (not player.boolJumping)):
+            boolTempImmunity = False
             intDir=1
         elif (not player.boolJumping):
             intDir=0
@@ -208,14 +240,15 @@ while(not kill):
         
         intNoMoreJumping-=dt ##NO MORE JUMPING! NO MORE SPACEBAR. NO MORE JUMPING INTO A BLOCK BACKWARDS. NO MORE TROLLS. YOU BEEN BLOCKED.
 
-
+        if (not boolTempImmunity):
+            intTimeLeft-=dt
         
         ##DETETAR COLISOES
         if (player.intHurt > 0):
             player.intHurt-=dt
             player.floatVy=abs(player.floatVy) ##PARA CAIR
         else:
-            if(badCollision(player,enemies,enemyImage)): ##DETETAR SE BATEU EM UM INIMGO
+            if(badCollision(player,enemies,enemyImage) and not boolTempImmunity): ##DETETAR SE BATEU EM UM INIMGO
                 player.intHurt=3000 ##3 SEGUNDOS
                 player.floatY=player.intFloorY
             else:
@@ -247,6 +280,7 @@ while(not kill):
                 intCurFloor+=1
                 if(intCurFloor==5):
                     boolMainMenu = True
+                    intTimeLeft = 49999
                     timeMainMenu = 1000
                     ##RESET AS VARIAVEIS PARA UM JOGO NOVO
                     intDir=0
@@ -270,7 +304,7 @@ while(not kill):
                     player.boolEnabled=True
                     player.boolFloor=False
                     player=playerClass()
-                    ##CODIGO
+                    enemies=data[0] ##PARA OS INIMIGOS VOLTAREM AS POSIÇOES INICIAIS
             
             elif(not bigSwitches[intCurFloor].boolEnabled and not smallSwitches[intCurFloor].boolEnabled): ##DETETAR SE ESTÁ EM UM ELEVADOR
                 if(elevators[intCurFloor].IsElevator(player) or elevators[intCurFloor].boolElevating):
@@ -288,6 +322,8 @@ while(not kill):
         
         ##screen.fill((255,255,255)) EU SEI QUE O .fill EXISTE, MAS PREFIRO FAZER ISTO ASSIM
         pygame.draw.rect(screen, (0,0,0), pygame.Rect(0, 0, 800, 600))
+        pygame.draw.rect(screen, (0,0,255), pygame.Rect(0, floors[4-(intTimeLeft//10000)], 800, 600))
+        print(intTimeLeft)
         screen.blit(levelImage, (0,0))
 
         drawList(walls,screen,wallImage)
