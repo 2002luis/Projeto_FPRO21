@@ -2,81 +2,9 @@ import pickle
 import pygame
 from airlockEntities import *
 from airlockUI import *
+from airlockFuncs import *
 
 
-def closeWalls(walls,button):
-    button.boolEnabled=False
-    for wall in walls:
-        wall.boolEnabled=True
-
-def openWalls(wall,button):
-    button.boolEnabled=False
-    wall.boolEnabled=False
-
-
-'''
-.----------------.  .----------------.  .----------------. 
-| .--------------. || .--------------. || .--------------. |
-| |     _____    | || |     ______   | || |   _____      | |
-| |    |_   _|   | || |   .' ___  |  | || |  |_   _|     | |
-| |      | |     | || |  / .'   \_|  | || |    | |       | |
-| |   _  | |     | || |  | |         | || |    | |   _   | |
-| |  | |_' |     | || |  \ `.___.'\  | || |   _| |__/ |  | |
-| |  `.___.'     | || |   `._____.'  | || |  |________|  | |
-| |              | || |              | || |              | |
-| '--------------' || '--------------' || '--------------' |
- '----------------'  '----------------'  '----------------'
- '''
-
-
-def badCollision(player,testObject,tup): ## NO CASO DE COLIDIR COM ALGUMA COISA MÁ, TENHO QUE DAR ALGUM ESPAÇO
-    if(type(testObject)==list):
-        for i in testObject:
-            if (badCollision(player,i,tup)):
-                return(i)
-    else:
-        if(pygame.Rect.colliderect(pygame.Rect(int(player.floatX)+5,int(player.floatY)-24,32-10,24),pygame.Rect(testObject.intX+2,testObject.intY+4,tup[0]-4,tup[1]))):
-            player.floatVy=abs(player.floatVy)
-            return(testObject)
-    return(False)
-
-def goodCollision(player,testObject): ## NO CASO DE COLIDIR COM ALGUMA COISA BOA, NÃO PRECISO
-    if(type(testObject)==list):
-        for i in testObject:
-            if (goodCollision(player,i)):
-                return(i)
-    else:
-        if(pygame.Rect.colliderect(pygame.Rect(int(player.floatX),int(player.floatY)-24,32,24),pygame.Rect(testObject.intX,testObject.intY,12,24))): ##O MESMO TAMANHO FUNCIONA PARA TODAS AS COISAS BOAS, BOTOES E ELEVADORES
-            return(testObject)
-    return(False)
-
-def drawList(listObj,screen):
-    for obj in listObj:
-        if (obj.boolEnabled):
-            obj.Draw(screen)
-
-def drawListEntity(listObj,screen,image):
-    for obj in listObj:
-        if (obj.boolEnabled):
-            obj.Draw(screen,image)
-
-def moveFish(listObj,dt):
-    for obj in listObj:
-        if(type(obj)==list):
-            moveFish(obj,dt)
-        else:
-            obj.Move(dt)
-
-def writeFile(data,strPath):
-    file = open("levelData/"+strPath+".pckl", "wb")
-    pickle.dump(data, file)
-    file.close()
-
-def readFile(strPath):
-    file = open("levelData/"+strPath+".pckl", "rb")
-    obj = pickle.load(file)
-    file.close()
-    return(obj)
 '''
  _____     ____
  /      \  |  o | 
@@ -162,6 +90,8 @@ jumpChannel = pygame.mixer.Channel(0)
 walkChannel = pygame.mixer.Channel(1)
 mainMenuChannel = pygame.mixer.Channel(2)
 gameOverChannel = pygame.mixer.Channel(3)
+enemyChannel = pygame.mixer.Channel(4)
+wallChannel = pygame.mixer.Channel(5)
 
 ##ENQUANTO NAO TIVER UM ECRA DE TITULO VOU INICIALIZAR TUDO AQUI
 for wall in walls:
@@ -296,7 +226,7 @@ while(not kill):
             if(badCollision(player,enemies,(32,12)) and not boolTempImmunity): ##DETETAR SE BATEU EM UM INIMGO
                 player.intHurt=3000 ##3 SEGUNDOS
                 player.floatY=player.intFloorY
-                enemyHitSound.play()
+                enemyChannel.play(enemyHitSound)
             else:
                 if(not(elevators[intCurFloor].boolElevating)): ##SO SE MEXE SE NAO ESTIVER EM UM ELEVADOR
                     intNewDir=player.HandleBlocks(badCollision(player,blocks,(21,15)),intDir)
@@ -305,10 +235,11 @@ while(not kill):
                         intNoMoreJumping=50
                         player.floatVy=0.3
                         intDir=intNewDir
-                        wallSound.play()
+                        if(not wallChannel.get_busy()):
+                            wallChannel.play(wallSound)
                     elif(intDir!=0 and player.floatY==player.intFloorY and not walkChannel.get_busy()):
                         walkChannel.play(walkSound)
-                    player.Move(intDir,dt,walls[intCurFloor].boolEnabled)
+                    player.Move(intDir,dt,walls[intCurFloor].boolEnabled,wallSound,wallChannel)
                     
                 player.Fall(dt)
                 if(player.floatY>=player.intFloorY and player.floatVy>0):
