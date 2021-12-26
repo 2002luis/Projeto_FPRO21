@@ -80,3 +80,29 @@ class smallSwitch(switch):
         wall.boolEnabled=False
     def Draw(this,screen):
         pygame.draw.rect(screen, (208,112,112), pygame.Rect(this.intX+2, this.intY, 8, 20))
+
+class button(): ##PARA O COISO DE FAZER OS NIVEIS
+    def __init__(this,intX,intY,intType,image):
+        this.intX=intX
+        this.intY=intY
+        this.intType=intType ##0 == SMALL SWITCH, 1 == BIG SWITCH, 2 == ENEMY (NORMAL), 3 == ENEMY (FAST RIGHT), 4 == ENEMY (FAST LEFT),5 == BLOCK, 6 == SAVE
+        this.image=image
+    def Draw(this,screen,intType):
+        if(this.intType==intType):
+            pygame.draw.rect(screen, (112,208,112), pygame.Rect(this.intX, this.intY, 48, 48))
+        else:
+            pygame.draw.rect(screen, (208,112,112), pygame.Rect(this.intX, this.intY, 48, 48))
+        pygame.draw.rect(screen, (0,0,0), pygame.Rect(this.intX+4, this.intY+4, 40, 40))
+        font = pygame.font.Font('consolas.ttf', 16)
+
+        if(this.image==None):
+            saveText = font.render("Save", True, (188,140,76))
+            saveRect = saveText.get_rect()
+            saveRect.center = (this.intX+24, this.intY+24)
+            screen.blit(saveText,saveRect)
+        else:
+            screen.blit(this.image, (this.intX+8, this.intY+16))
+    def isPressed(this,pos):
+        if(this.intX<=pos[0] and this.intX+48>=pos[0] and this.intY<=pos[1] and this.intY+48>=pos[1]):
+            return(True)
+        return(False)

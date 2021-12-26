@@ -15,7 +15,7 @@ class playerClass():
     def Draw(this,screen,image):
         screen.blit(image, (int(this.floatX), int(this.floatY-24)))
         
-    def Move(this,direction,dt,wall):
+    def Move(this,direction,dt,wall,sound,channel):
         newPos=this.floatX+(direction*0.12*dt)
         if(newPos<22):
             newPos=22
@@ -23,8 +23,12 @@ class playerClass():
             newPos=779-32
         elif(wall and newPos<77):
             newPos=77
+            if(not channel.get_busy()):
+                channel.play(sound)
         elif(wall and newPos>723-32):
             newPos=723-32
+            if(not channel.get_busy()):
+                channel.play(sound)
         this.floatX=newPos
         
     def Jump(this):

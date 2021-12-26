@@ -77,3 +77,16 @@ def readFile(strPath):
     obj = pickle.load(file)
     file.close()
     return(obj)
+
+def levelMakerInfo(intX,intY): ##DÁ RETURN AO Y DE CIMA E DE BAIXO DO SITIO ONDE SE ESTA A APONTAR
+    if(intX<=80 or intX>=720 or intY<=116 or intY>=536):
+        return(False)
+    if(intY<=200):
+        return([119,189,4])
+    if(intY<=283):
+        return([204,276,3])
+    if(intY<=368):
+        return([291,361,2])
+    if(intY<456):
+        return([376,449,1])
+    return([463,534,0])
