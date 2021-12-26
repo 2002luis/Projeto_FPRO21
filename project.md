@@ -31,6 +31,6 @@ Um jogo em que o utilizador controla uma pessoa que tenta evitar os obstáculos 
 1. Carregar e desenhar o nível
 2. Ler teclas e mover o jogador e inimigo
 3. Verificar se o jogador carregou nos botões, se bateu em algum obstáculo ou se chegou a um elevador
-4. Verificar se o jogador chegou ao fim de cada parte do nível
+4. Verificar se o jogador chegou ao fim do jogo ou se se afundou
 
 - Atualizado a última vez em 26/12/2021
