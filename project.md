@@ -19,8 +19,7 @@ Um jogo em que o utilizador controla uma pessoa que tenta evitar os obstáculos 
 
 ### UI
 
-##TODO
-![UI](https://imgur.com/a/mncxElc)
+![UI](https://i.imgur.com/I7vM8Um.png)
 
 ### Pacotes
 
